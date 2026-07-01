@@ -308,11 +308,12 @@ export const verifyOTP = async (req, res, next) => {
 
 // 9. FORGOT PASSWORD — STEP 3: RESET PASSWORD   //fIXED
 // POST /api/auth/reset-password
+// POST /api/auth/reset-password
 export const resetPassword = async (req, res, next) => {
             try {
-                        // FIXED: Expects the secure resetToken now instead of clear text OTP codes
-                        const { resetToken, newPassword } = req.body;
+                        const { resetToken, newPassword, confirmPassword } = req.body; // ✅ add confirmPassword
 
+                        // check if resetToken exists
                         if (!resetToken) {
                                     return res.status(400).json({
                                                 success: false,
@@ -320,7 +321,15 @@ export const resetPassword = async (req, res, next) => {
                                     });
                         }
 
-                        // FIXED: Validate token signature and decrypt payload
+                        // ✅ check if passwords match before doing anything else
+                        if (newPassword !== confirmPassword) {
+                                    return res.status(400).json({
+                                                success: false,
+                                                message: "Passwords do not match"
+                                    });
+                        }
+
+                        // validate token signature and decrypt payload
                         let decoded;
                         try {
                                     decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
@@ -342,7 +351,7 @@ export const resetPassword = async (req, res, next) => {
                                     });
                         }
 
-                        // check if new password matches old password
+                        // check if new password is same as old password
                         const isSamePassword = await bcrypt.compare(newPassword, user.password);
                         if (isSamePassword) {
                                     return res.status(400).json({
@@ -351,11 +360,11 @@ export const resetPassword = async (req, res, next) => {
                                     });
                         }
 
-                        // update password — pre-save hook handles hashing automatically
+                        // update password — pre save hook handles hashing
                         user.password = newPassword;
                         await user.save();
 
-                        // database housekeeping cleanup
+                        // cleanup
                         await OTP.deleteMany({ email });
 
                         return res.status(200).json({

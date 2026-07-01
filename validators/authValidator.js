@@ -92,7 +92,12 @@ export const resetPasswordSchema = Joi.object({
                         'string.empty': 'Password cannot be empty.',
                         'string.min': 'Password must be at least 6 characters long.',
                         'any.required': 'Password is required.'
-            })
+            }),
+            confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required().messages({
+                        'any.only': 'Passwords do not match',
+                        'string.empty': 'Confirm password is required',
+                        'any.required': 'Confirm password is required'
+            }),
 });
 
 

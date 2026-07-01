@@ -24,10 +24,13 @@ import {
             getStudentProgress
 } from '../controllers/instructorController.js';
 
-import validate, { uploadLessonResourceSchema } from '../validators/instructorValidator.js';
-import { createCourseSchema, updateCourseSchema, createLessonSchema, updateLessonSchema, createQuizSchema } from '../validators/instructorValidator.js';
+import validate from '../validators/instructorValidator.js';
+
+import { createCourseSchema, updateCourseSchema, createLessonSchema, updateLessonSchema, createQuizSchema, uploadLessonResourceSchema } from '../validators/instructorValidator.js';
+
 import authMiddleware, { instructorOnly } from '../middlewares/authMiddleware.js';
-import { resourceUpload, videoUpload } from '../middlewares/uploadMiddleware.js';
+
+import { resourceUpload, thumbnailUpload, videoUpload } from '../middlewares/uploadMiddleware.js';
 
 const instructorRoutes = express.Router();
 
@@ -37,7 +40,7 @@ const instructorRoutes = express.Router();
 instructorRoutes.get('/dashboard', authMiddleware, instructorOnly, getInstructorDashboard);
 
 // course management
-instructorRoutes.post('/create', authMiddleware, instructorOnly, validate(createCourseSchema), createCourse);
+instructorRoutes.post('/create', authMiddleware, instructorOnly, validate(createCourseSchema), thumbnailUpload.single('thumbnail'), createCourse);
 instructorRoutes.get('/courses', authMiddleware, instructorOnly, getInstructorCourses);
 instructorRoutes.get('/courses/:courseId', authMiddleware, instructorOnly, getSingleInstructorCourse);
 instructorRoutes.patch('/courses/:courseId', authMiddleware, instructorOnly, validate(updateCourseSchema), updateCourse);
@@ -50,6 +53,7 @@ instructorRoutes.get('/courses/:courseId/lessons', authMiddleware, instructorOnl
 instructorRoutes.put('/lessons/:lessonId', authMiddleware, instructorOnly, validate(updateLessonSchema), updateLesson);
 instructorRoutes.delete('/lessons/:lessonId', authMiddleware, instructorOnly, deleteLesson);
 instructorRoutes.post('/lessons/:lessonId/resources', authMiddleware, instructorOnly, validate(uploadLessonResourceSchema), resourceUpload.single("raw"), uploadLessonResource)
+instructorRoutes.delete('/lessons/:lessonId/resources/:resourceId', authMiddleware, instructorOnly, deleteLessonResource)
 
 // quiz management
 instructorRoutes.post('/courses/:courseId/quizzes', authMiddleware, instructorOnly, validate(createQuizSchema), createQuiz);
