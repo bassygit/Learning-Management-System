@@ -306,12 +306,10 @@ export const verifyOTP = async (req, res, next) => {
             }
 };
 
-// 9. FORGOT PASSWORD — STEP 3: RESET PASSWORD   //fIXED
-// POST /api/auth/reset-password
 // POST /api/auth/reset-password
 export const resetPassword = async (req, res, next) => {
             try {
-                        const { resetToken, newPassword, confirmPassword } = req.body; // ✅ add confirmPassword
+                        const { resetToken, newPassword, confirmPassword } = req.body;
 
                         // check if resetToken exists
                         if (!resetToken) {
@@ -321,7 +319,6 @@ export const resetPassword = async (req, res, next) => {
                                     });
                         }
 
-                        // ✅ check if passwords match before doing anything else
                         if (newPassword !== confirmPassword) {
                                     return res.status(400).json({
                                                 success: false,

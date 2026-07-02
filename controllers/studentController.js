@@ -2,10 +2,10 @@ import Course from '../models/courseModel.js';
 import Lesson from '../models/lessonModel.js';
 import Enrollment from '../models/enrollmentModel.js';
 import Quiz from '../models/quizModel.js';
-import QuizResult from '../models/quizResultModel.js';
 import Certificate from '../models/certificateModel.js';
 import User from '../models/userModel.js';
 import crypto from 'crypto';
+import QuizResult from '../models/quizresultModel.js';
 
 // ---- STUDENT DASHBOARD ----
 // GET /api/student/dashboard

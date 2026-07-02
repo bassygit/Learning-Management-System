@@ -33,13 +33,9 @@ const quizResultSchema = new mongoose.Schema({
             }
 }, { timestamps: true });
 
+
 const QuizResult = mongoose.models.QuizResult || mongoose.model('QuizResult', quizResultSchema);
-
 export default QuizResult;
-
-
-
-
 
 
 // const QuizResult = mongoose.model('QuizResult', quizResultSchema);
