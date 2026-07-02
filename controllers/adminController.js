@@ -4,9 +4,9 @@ import Lesson from '../models/lessonModel.js';
 import Quiz from '../models/quizModel.js';
 import Enrollment from '../models/enrollmentModel.js';
 import Certificate from '../models/certificateModel.js';
-import QuizResult from '../models/quizResultModel.js';
 import InstructorProfile from '../models/instructorModel.js';
 import Report from '../models/reportModel.js';
+import QuizResult from '../models/quizresultModel.js';
 
 // ---- USER MANAGEMENT ----
 
