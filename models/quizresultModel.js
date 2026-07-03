@@ -34,7 +34,7 @@ const quizResultSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
-const QuizResult = mongoose.models.QuizResult || mongoose.model('QuizResult', quizResultSchema);
+const QuizResult = mongoose.model('QuizResult', quizResultSchema);
 export default QuizResult;
 
 

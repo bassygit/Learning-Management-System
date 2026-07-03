@@ -29,9 +29,7 @@ app.use(express.json());
 const allowedOrigins = [
             "http://localhost:5173",
             "http://localhost:3001",
-            // "http://localhost:3002",
-
-
+            //"http://localhost:3002",
 ];
 
 app.use(
@@ -49,8 +47,6 @@ app.use(
             })
 );
 
-
-
 app.use(cookieParser());
 
 // ROUTES
@@ -58,7 +54,7 @@ app.use('/auth', authRoutes);
 app.use('/student', studentRoutes);
 app.use('/instructor', instructorRoutes);
 app.use('/admin', adminRoutes);
-app.use('/payment', paymentRoutes); // Quick bugfix: Added missing leading slash here
+app.use('/payment', paymentRoutes);
 app.use('/instructorapplication', instructorApplicationRoutes);
 app.use(errorHandler);
 

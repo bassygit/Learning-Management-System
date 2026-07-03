@@ -4,6 +4,7 @@ import Quiz from '../models/quizModel.js';
 import QuizResult from '../models/quizresultModel.js';
 import Enrollment from '../models/enrollmentModel.js';
 import InstructorProfile from '../models/instructorModel.js';
+import cloudinary from '../config/cloudinary.js';
 import { deleteFromCloudinary, getPublicIdFromUrl } from '../utils/cloudinaryHelper.js';
 
 
@@ -648,7 +649,7 @@ export const createQuiz = async (req, res, next) => {
                                     });
                         }
 
-                        if (course.instructor.toString() !== req.user.id.toString()) {
+                        if (course.instructorId.toString() !== req.user.id.toString()) {
                                     return res.status(403).json({
                                                 success: false,
                                                 message: "You are not authorized to add quizzes to this course"
@@ -657,7 +658,7 @@ export const createQuiz = async (req, res, next) => {
 
                         const quiz = await Quiz.create({
                                     title,
-                                    course: req.params.courseId,
+                                    courseId: req.params.courseId,
                                     lesson: lessonId,
                                     questions,
                                     passingScore,

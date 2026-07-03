@@ -2,7 +2,6 @@ import express from 'express';
 // import { thumbnailUpload, videoUpload, resourceUpload } from '../middlewares/uploadMiddleware.js'; // adjust path if different
 
 
-
 import {
             getInstructorDashboard,
             createCourse,
