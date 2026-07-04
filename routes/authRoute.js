@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, getProfile, updateProfile, changePassword, forgotPassword, verifyOTP, resetPassword, resendOTP } from '../controllers/authController.js';
+import { register, login, logout, getProfile, updateProfile, changePassword, forgotPassword, verifyOTP, resetPassword, resendOTP } from '../controllers/authController.js';
 
 import validate from '../validators/authValidator.js';
 import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema, verifyOTPSchema, resetPasswordSchema, } from '../validators/authValidator.js';
@@ -13,7 +13,8 @@ const authRoutes = express.Router();
 authRoutes.post('/register', validate(registerSchema), register);
 authRoutes.post('/login', validate(loginSchema), login);
 
-// ✅ auth required
+//  auth required
+authRoutes.post('/logout', authMiddleware, logout);
 authRoutes.get('/me', authMiddleware, getProfile);
 authRoutes.patch('/update', authMiddleware, avatarUpload.single('avatar'), validate(updateProfileSchema), updateProfile);
 authRoutes.patch('/changepassword', authMiddleware, validate(changePasswordSchema), changePassword);

@@ -5,7 +5,8 @@ import generateToken from '../utils/generateToken.js';
 import OTP from '../models/otpModel.js';
 import sendEmail from '../utils/sendEmail.js';
 import { otpEmailTemplate } from '../utils/emailTemplates.js';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+import BlacklistedToken from '../models/blacklistedTokenModel.js';
 
 // ---- REGISTER ----
 // POST /api/auth/register
@@ -88,6 +89,30 @@ export const login = async (req, res, next) => {
                         next(error);
             }
 };
+
+export const logout = async (req, res, next) => {
+            try {
+                        // get token from header
+                        const authHeader = req.headers.authorization || req.headers.Authorization;
+                        const token = authHeader.split(" ")[1];
+
+                        // add token to blacklist so it cannot be used again
+                        await BlacklistedToken.create({
+                                    token,
+                                    expiresAt: new Date(Date.now() + 60 * 60 * 1000) // expires in 1 hour same as token
+                        });
+
+                        return res.status(200).json({
+                                    success: true,
+                                    message: "Logged out successfully"
+                        });
+
+            } catch (error) {
+                        next(error);
+            }
+};
+
+
 
 // ---- GET PROFILE ----
 // GET /api/auth/me

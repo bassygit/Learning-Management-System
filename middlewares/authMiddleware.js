@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
+import BlacklistedToken from '../models/blacklistedTokenModel.js';
+
 
 // Middleware 1 — checks if user is logged in
 export const authMiddleware = async (req, res, next) => {
@@ -17,6 +19,16 @@ export const authMiddleware = async (req, res, next) => {
 
                         // extract token
                         const token = authHeader.split(" ")[1];
+
+
+                        //check if token has been blacklisted — user already logged out
+                        const isBlacklisted = await BlacklistedToken.findOne({ token });
+                        if (isBlacklisted) {
+                                    return res.status(401).json({
+                                                success: false,
+                                                message: "Token is no longer valid. Please login again"
+                                    });
+                        }
 
                         // verify token
                         const decoded = jwt.verify(token, process.env.JWT_SECRET);
