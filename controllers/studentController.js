@@ -156,6 +156,7 @@ export const getCourseLessons = async (req, res, next) => {
             try {
                         const { courseId } = req.params;
 
+
                         // check if student is enrolled
                         const enrollment = await Enrollment.findOne({
                                     studentId: req.user.id,//correction
@@ -170,13 +171,14 @@ export const getCourseLessons = async (req, res, next) => {
                         }
 
                         // get all lessons for this course
-                        const lessons = await Lesson.find({ course: courseId })
+                        const lessons = await Lesson.find({ courseId: courseId })
                                     .sort({ order: 1 }); // sort by order
+
 
                         // mark which lessons are completed
                         const lessonsWithProgress = lessons.map(lesson => ({
                                     ...lesson.toObject(),
-                                    isCompleted: enrollment.completedLessonsId//correction
+                                    isCompleted: enrollment.completedLessonsId
                                                 .map(id => id.toString())
                                                 .includes(lesson._id.toString())
                         }));
