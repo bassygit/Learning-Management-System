@@ -14,7 +14,7 @@ import { deleteFromCloudinary, getPublicIdFromUrl } from '../utils/cloudinaryHel
 export const getInstructorDashboard = async (req, res, next) => {
             try {
                         // get all courses by this instructor
-                        const courses = await Course.find({ instructor: req.user.id });
+                        const courses = await course.find({ instructor: req.user.id });
 
                         // total students across all courses
                         const totalStudents = courses.reduce(

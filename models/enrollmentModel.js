@@ -4,8 +4,7 @@ const enrollmentSchema = new mongoose.Schema({
             studentId: {
                         type: mongoose.Schema.Types.ObjectId,
                         ref: 'User',
-                        required: true,
-                        unique: true
+                        required: true
             },
             courseId: {
                         type: mongoose.Schema.Types.ObjectId,
@@ -14,7 +13,8 @@ const enrollmentSchema = new mongoose.Schema({
             },
             completedLessonsId: [{
                         type: mongoose.Schema.Types.ObjectId,
-                        ref: 'Lesson'
+                        ref: 'Lesson',
+                        default: []
             }],
             progress: {
                         type: Number,
@@ -33,6 +33,8 @@ const enrollmentSchema = new mongoose.Schema({
                         type: String
             }
 }, { timestamps: true });
+
+enrollmentSchema.index({ studentId: 1, courseId: 1 }, { unique: true });
 
 const Enrollment = mongoose.model('Enrollment', enrollmentSchema);
 export default Enrollment;

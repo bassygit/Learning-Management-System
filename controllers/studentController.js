@@ -265,13 +265,13 @@ export const markLessonComplete = async (req, res, next) => {
                                     .includes(lessonId);
 
                         if (!alreadyCompleted) {
-                                    enrollment.completedLessons.push(lessonId);
+                                    enrollment.completedLessonsId.push(lessonId);
                         }
 
                         // recalculate progress
-                        const totalLessons = await Lesson.countDocuments({ course: lesson.course });
+                        const totalLessons = await Lesson.countDocuments({ courseId: lesson.courseId });
                         enrollment.progress = Math.round(
-                                    (enrollment.completedLessons.length / totalLessons) * 100
+                                    (enrollment.completedLessonsId.length / totalLessons) * 100
                         );
 
                         // check if course is completed
@@ -288,7 +288,7 @@ export const markLessonComplete = async (req, res, next) => {
                                     data: {
                                                 progress: enrollment.progress,
                                                 isCompleted: enrollment.isCompleted,
-                                                completedLessons: enrollment.completedLessons.length,
+                                                completedLessonsId: enrollment.completedLessonsId.length,
                                                 totalLessons
                                     }
                         });
