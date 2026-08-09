@@ -43,7 +43,7 @@ export const getStudentDashboard = async (req, res, next) => {
 };
 
 // ---- COURSE CATALOG ----
-// GET /api/student/courses
+// GET/api/student/courses
 export const getCourseCatalog = async (req, res, next) => {
             try {
                         // pagination
@@ -107,6 +107,12 @@ export const enrollCourse = async (req, res, next) => {
                                                 message: "Course is not available yet"
                                     });
                         }
+                        if (course.price > 0) {
+                                    return res.status(400).json({
+                                                success: false,
+                                                message: "This course requires payment. Please proceed to checkout."
+                                    });
+                        }/////////NEW
 
                         // check if student is already enrolled
                         const existingEnrollment = await Enrollment.findOne({

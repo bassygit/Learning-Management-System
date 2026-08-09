@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
                         type: Boolean,
                         default: true
             },
+            purchasedCourses: [{
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'Course'
+            }],
             enrolledCoursesId: [{
                         type: mongoose.Schema.Types.ObjectId,
                         ref: 'Course'
@@ -41,7 +45,11 @@ const userSchema = new mongoose.Schema({
             certificatesId: [{
                         type: mongoose.Schema.Types.ObjectId,
                         ref: 'Certificate'
-            }]
+            }],
+            activeSubscription: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: 'UserSubscription'
+            }
 }, { timestamps: true });
 
 userSchema.pre('save', async function () {

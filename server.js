@@ -1,7 +1,7 @@
+import 'dotenv/config';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import paymentRoutes from './routes/paymentRoute.js';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import ConnectDb from './config/db.js';
 import studentRoutes from './routes/studentRoute.js';
@@ -11,19 +11,9 @@ import errorHandler from './middlewares/errorMiddleware.js';
 import authRoutes from './routes/authRoute.js';
 import instructorApplicationRoutes from './routes/instructorApplicationRoute.js';
 
-dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 ConnectDb();
-
-app.use('/api/payment/webhook',
-            express.raw({ type: 'application/json' }),
-            (req, res, next) => {
-                        req.body = JSON.parse(req.body);
-                        next();
-            }
-);
 
 app.use(express.json());
 const allowedOrigins = [

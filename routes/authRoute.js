@@ -5,7 +5,7 @@ import validate from '../validators/authValidator.js';
 import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema, verifyOTPSchema, resetPasswordSchema, } from '../validators/authValidator.js';
 
 import authMiddleware from '../middlewares/authMiddleware.js';
-import { avatarUpload } from '../middlewares/uploadMiddleware.js';
+import { avatarUpload } from '../middlewares/uploadMiddleware.js'
 
 const authRoutes = express.Router();
 

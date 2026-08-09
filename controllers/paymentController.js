@@ -1,3 +1,4 @@
+// PAYMENT CONTROLLER
 import axios from 'axios';
 import crypto from 'crypto';
 import Course from '../models/courseModel.js';
@@ -6,6 +7,7 @@ import Enrollment from '../models/enrollmentModel.js';
 import User from '../models/userModel.js';
 import SubscriptionPlan from '../models/subcriptionModel.js';
 import UserSubscription from '../models/userSubcriptionModel.js';
+import sendEmail from '../utils/sendEmail.js'
 
 // ---- HELPER FUNCTIONS ----
 
@@ -71,7 +73,9 @@ export const initializePayment = async (req, res, next) => {
                                     }
 
                                     // check if already purchased
-                                    if (user.purchasedCourses.map(id => id.toString()).includes(courseId)) {
+                                    // (user.purchasedCourses || []) guards against older user documents
+                                    // created before this field existed on the schema
+                                    if ((user.purchasedCourses || []).map(id => id.toString()).includes(courseId)) {
                                                 return res.status(400).json({
                                                             success: false,
                                                             message: "You have already purchased this course"
@@ -88,7 +92,7 @@ export const initializePayment = async (req, res, next) => {
 
                                     amount = course.price;
                                     itemName = course.title;
-                                    paymentData.course = courseId;
+                                    paymentData.courseId = courseId;
                         }
 
                         // ---- SUBSCRIPTION PAYMENT ----
@@ -132,7 +136,7 @@ export const initializePayment = async (req, res, next) => {
 
                         // create pending payment in database
                         const payment = await Payment.create({
-                                    user: req.user.id,
+                                    userId: req.user.id,
                                     type,
                                     ...paymentData,
                                     amount,
@@ -302,15 +306,20 @@ export const verifyPayment = async (req, res, next) => {
 
 // POST /api/payment/webhook
 // called automatically by paystack after payment
+// NOTE: this route must receive the RAW body (express.raw), and must be
+// registered BEFORE any global express.json() middleware in app.js,
+// otherwise req.body will already be parsed and the signature check
+// below will fail on every real Paystack webhook call.
 export const paystackWebhook = async (req, res, next) => {
             try {
                         // ---- VERIFY WEBHOOK SIGNATURE ----
-                        // this makes sure the request is actually from paystack
-                        // and not from someone pretending to be paystack
+                        // req.body is a raw Buffer here (see app.js wiring) — hash the
+                        // raw bytes, not a JSON.stringify of an already-parsed object,
+                        // or the signature will never match.
                         const signature = req.headers['x-paystack-signature'];
                         const hash = crypto
                                     .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
-                                    .update(JSON.stringify(req.body))
+                                    .update(req.body)
                                     .digest('hex');
 
                         if (hash !== signature) {
@@ -320,7 +329,8 @@ export const paystackWebhook = async (req, res, next) => {
                                     });
                         }
 
-                        const event = req.body;
+                        // only parse AFTER the signature has been verified
+                        const event = JSON.parse(req.body);
                         console.log('Paystack webhook event:', event.event);
 
                         // ---- HANDLE DIFFERENT EVENTS ----
@@ -402,33 +412,68 @@ const fulfillPayment = async (payment) => {
             // ---- FULFILL COURSE PURCHASE ----
             if (payment.type === 'course') {
                         // add course to student purchased courses
-                        await User.findByIdAndUpdate(payment.user, {
-                                    $addToSet: { purchasedCourses: payment.course } // addToSet prevents duplicates
+                        await User.findByIdAndUpdate(payment.userId, {
+                                    $addToSet: { purchasedCourses: payment.courseId } // addToSet prevents duplicates
                         });
 
                         // check if already enrolled
                         const existingEnrollment = await Enrollment.findOne({
-                                    student: payment.user,
-                                    course: payment.course
+                                    studentId: payment.userId,
+                                    courseId: payment.courseId
                         });
 
                         if (!existingEnrollment) {
                                     // create enrollment
                                     await Enrollment.create({
-                                                student: payment.user,
-                                                course: payment.course,
+                                                studentId: payment.userId,
+                                                courseId: payment.courseId,
                                                 paymentRef: payment.paymentRef
                                     });
 
                                     // add student to course
-                                    await Course.findByIdAndUpdate(payment.course, {
-                                                $addToSet: { enrolledStudents: payment.user }
+                                    await Course.findByIdAndUpdate(payment.courseId, {
+                                                $addToSet: { enrolledStudentsId: payment.userId }
                                     });
 
                                     // add course to user enrolled courses
-                                    await User.findByIdAndUpdate(payment.user, {
-                                                $addToSet: { enrolledCourses: payment.course }
+                                    await User.findByIdAndUpdate(payment.userId, {
+                                                $addToSet: { enrolledCoursesId: payment.courseId }
                                     });
+                        }
+
+                        // ---- NOTIFY (course purchase) ----
+                        // wrapped in its own try/catch so a failed email never undoes
+                        // an already-successful payment/enrollment
+                        try {
+                                    const [user, course] = await Promise.all([
+                                                User.findById(payment.userId),
+                                                Course.findById(payment.courseId)
+                                    ]);
+
+                                    await sendEmail({
+                                                to: user.email,
+                                                subject: 'Payment Confirmation — Course Purchase',
+                                                html: `
+                    <p>Hi ${user.name},</p>
+                    <p>Your payment for <strong>${course.title}</strong> was successful.</p>
+                    <p>Amount: ₦${payment.amount}<br/>
+                    Invoice: ${payment.invoiceNumber}<br/>
+                    Reference: ${payment.paymentRef}</p>
+                    <p>You now have full access to the course.</p>
+                `
+                                    });
+
+                                    await sendEmail({
+                                                to: process.env.ADMIN_EMAIL,
+                                                subject: 'New Course Payment Received',
+                                                html: `
+                    <p>${user.name} (${user.email}) just paid for <strong>${course.title}</strong>.</p>
+                    <p>Amount: ₦${payment.amount}<br/>
+                    Reference: ${payment.paymentRef}</p>
+                `
+                                    });
+                        } catch (emailError) {
+                                    console.error('fulfillPayment: notification email failed:', emailError);
                         }
             }
 
@@ -443,7 +488,7 @@ const fulfillPayment = async (payment) => {
 
                         // create user subscription
                         const userSubscription = await UserSubscription.create({
-                                    user: payment.user,
+                                    user: payment.userId,
                                     plan: payment.subscription,
                                     startDate,
                                     endDate,
@@ -453,9 +498,39 @@ const fulfillPayment = async (payment) => {
                         });
 
                         // update user active subscription
-                        await User.findByIdAndUpdate(payment.user, {
+                        await User.findByIdAndUpdate(payment.userId, {
                                     activeSubscription: userSubscription._id
                         });
+
+                        // ---- NOTIFY (subscription purchase) ----
+                        try {
+                                    const user = await User.findById(payment.userId);
+
+                                    await sendEmail({
+                                                to: user.email,
+                                                subject: 'Payment Confirmation — Subscription',
+                                                html: `
+                    <p>Hi ${user.name},</p>
+                    <p>Your payment for the <strong>${plan.name}</strong> subscription was successful.</p>
+                    <p>Amount: ₦${payment.amount}<br/>
+                    Valid until: ${endDate.toDateString()}<br/>
+                    Invoice: ${payment.invoiceNumber}<br/>
+                    Reference: ${payment.paymentRef}</p>
+                `
+                                    });
+
+                                    await sendEmail({
+                                                to: process.env.ADMIN_EMAIL,
+                                                subject: 'New Subscription Payment Received',
+                                                html: `
+                    <p>${user.name} (${user.email}) just subscribed to <strong>${plan.name}</strong>.</p>
+                    <p>Amount: ₦${payment.amount}<br/>
+                    Reference: ${payment.paymentRef}</p>
+                `
+                                    });
+                        } catch (emailError) {
+                                    console.error('fulfillPayment: notification email failed:', emailError);
+                        }
             }
 };
 
@@ -466,10 +541,10 @@ export const getInvoice = async (req, res, next) => {
             try {
                         const payment = await Payment.findOne({
                                     paymentRef: req.params.reference,
-                                    user: req.user.id  // make sure invoice belongs to logged in user
+                                    userId: req.user.id  // make sure invoice belongs to logged in user
                         })
-                                    .populate('user', 'name email')
-                                    .populate('course', 'title price')
+                                    .populate('userId', 'name email')
+                                    .populate('courseId', 'title price')
                                     .populate('subscription', 'name price duration');
 
                         if (!payment) {
@@ -488,14 +563,14 @@ export const getInvoice = async (req, res, next) => {
                                                 paidDate: payment.paidAt,
                                                 status: payment.status,
                                                 issuedTo: {
-                                                            name: payment.user.name,
-                                                            email: payment.user.email
+                                                            name: payment.userId.name,
+                                                            email: payment.userId.email
                                                 },
                                                 item: payment.type === 'course'
                                                             ? {
                                                                         type: 'Course Purchase',
-                                                                        name: payment.course.title,
-                                                                        price: payment.course.price
+                                                                        name: payment.courseId.title,
+                                                                        price: payment.courseId.price
                                                             }
                                                             : {
                                                                         type: 'Subscription Plan',
@@ -525,12 +600,12 @@ export const getPaymentHistory = async (req, res, next) => {
                         const limit = parseInt(req.query.limit) || 10;
                         const skip = (page - 1) * limit;
 
-                        const filter = { user: req.user.id };
+                        const filter = { userId: req.user.id };
                         if (req.query.status) filter.status = req.query.status;
                         if (req.query.type) filter.type = req.query.type;
 
                         const payments = await Payment.find(filter)
-                                    .populate('course', 'title thumbnail')
+                                    .populate('courseId', 'title thumbnail')
                                     .populate('subscription', 'name duration')
                                     .skip(skip)
                                     .limit(limit)

@@ -1,6 +1,6 @@
 // OTP email template
 export const otpEmailTemplate = (name, otp) => {
-            return `
+  return `
     <!DOCTYPE html>
     <html>
     <head>
