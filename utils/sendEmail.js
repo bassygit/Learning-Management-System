@@ -1,18 +1,21 @@
 import nodemailer from 'nodemailer';
+import dns from 'node:dns';
 
 const sendEmail = async ({ to, subject, html }) => {
             try {
                         // create transporter
                         const transporter = nodemailer.createTransport({
                                     host: process.env.EMAIL_HOST,
-                                    port: process.env.EMAIL_PORT,
-                                    secure: false, // true for 465, false for other ports
+                                    port: parseInt(process.env.EMAIL_PORT) || 587,
+                                    secure: false, // false for port 587
                                     auth: {
                                                 user: process.env.EMAIL_USER,
                                                 pass: process.env.EMAIL_PASS
                                     },
-                                    // FORCE NODEMAILER TO USE IPV4 
-                                    family: 4,
+                                    // THIS FORCES DNS TO RESOLVE ONLY IPV4 ADDRESSES
+                                    lookup: (hostname, options, callback) => {
+                                                return dns.lookup(hostname, { family: 4 }, callback);
+                                    },
                                     tls: {
                                                 rejectUnauthorized: false
                                     }
@@ -36,8 +39,6 @@ const sendEmail = async ({ to, subject, html }) => {
 };
 
 export default sendEmail;
-
-
 
 
 
