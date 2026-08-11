@@ -1,8 +1,4 @@
 import nodemailer from 'nodemailer';
-import dns from 'node:dns';
-
-// Force Node.js to prefer IPv4 when looking up the email host address
-dns.setDefaultResultOrder('ipv4first');
 
 const sendEmail = async ({ to, subject, html }) => {
             try {
@@ -10,10 +6,15 @@ const sendEmail = async ({ to, subject, html }) => {
                         const transporter = nodemailer.createTransport({
                                     host: process.env.EMAIL_HOST,
                                     port: process.env.EMAIL_PORT,
-                                    secure: false,
+                                    secure: false, // true for 465, false for other ports
                                     auth: {
                                                 user: process.env.EMAIL_USER,
                                                 pass: process.env.EMAIL_PASS
+                                    },
+                                    // FORCE NODEMAILER TO USE IPV4 
+                                    family: 4,
+                                    tls: {
+                                                rejectUnauthorized: false
                                     }
                         });
 
@@ -35,7 +36,6 @@ const sendEmail = async ({ to, subject, html }) => {
 };
 
 export default sendEmail;
-
 
 
 

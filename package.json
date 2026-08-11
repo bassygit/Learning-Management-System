@@ -26,6 +26,7 @@
     "multer": "^2.2.0",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^9.0.0",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "resend": "^6.19.0"
   }
 }
