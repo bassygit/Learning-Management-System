@@ -25,6 +25,10 @@ const generateInvoiceNumber = () => {
             return `INV-${timestamp}-${random}`;
 };
 
+
+const getClientUrl = () => (process.env.CLIENT_URL || '').replace(/\/+$/, '');
+
+
 // paystack axios instance
 const paystackAPI = axios.create({
             baseURL: 'https://api.paystack.co',
@@ -180,7 +184,7 @@ export const initializePayment = async (req, res, next) => {
                                                                         }
                                                             ]
                                                 },
-                                                callback_url: `${process.env.CLIENT_URL}/payment/verify?reference=${paymentRef}`
+                                                callback_url: `${getClientUrl()}/payment/verify?reference=${paymentRef}`
                                     }
                         );
 
