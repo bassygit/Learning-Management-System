@@ -5,6 +5,7 @@ import paymentRoutes from './routes/paymentRoute.js';
 import cors from 'cors';
 import ConnectDb from './config/db.js';
 import studentRoutes from './routes/studentRoute.js';
+import publicCourseRoutes from './routes/publicCourseRoute.js';
 import instructorRoutes from './routes/instructorRoute.js';
 import adminRoutes from './routes/adminRoute.js';
 import errorHandler from './middlewares/errorMiddleware.js';
@@ -41,6 +42,7 @@ app.use(cookieParser());
 
 // ROUTES
 app.use('/auth', authRoutes);
+app.use('/courses', publicCourseRoutes)
 app.use('/student', studentRoutes);
 app.use('/instructor', instructorRoutes);
 app.use('/admin', adminRoutes);
