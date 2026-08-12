@@ -7,6 +7,8 @@ import User from '../models/userModel.js';
 import crypto from 'crypto';
 import QuizResult from '../models/quizresultModel.js';
 
+
+
 // ---- STUDENT DASHBOARD ----
 // GET /api/student/dashboard
 export const getStudentDashboard = async (req, res, next) => {
@@ -34,6 +36,44 @@ export const getStudentDashboard = async (req, res, next) => {
                                                 inProgressCourses,
                                                 certificates: certificates.length,
                                                 recentCourses: enrollments.slice(0, 5), // last 5 courses
+                                    }
+                        });
+
+            } catch (error) {
+                        next(error);
+            }
+};
+
+// ---- MY LEARNING (full enrolled courses list) ----
+// GET /api/student/my-courses
+export const getMyCourses = async (req, res, next) => {
+            try {
+                        const page = parseInt(req.query.page) || 1;
+                        const limit = parseInt(req.query.limit) || 10;
+                        const skip = (page - 1) * limit;
+
+                        const filter = { studentId: req.user.id };
+
+                        // optional filtering: ?status=completed or ?status=in-progress
+                        if (req.query.status === 'completed') filter.isCompleted = true;
+                        if (req.query.status === 'in-progress') filter.isCompleted = false;
+
+                        const enrollments = await Enrollment.find(filter)
+                                    .populate('courseId', 'title thumbnail category level price instructorId')
+                                    .skip(skip)
+                                    .limit(limit)
+                                    .sort({ updatedAt: -1 });
+
+                        const total = await Enrollment.countDocuments(filter);
+
+                        return res.status(200).json({
+                                    success: true,
+                                    data: enrollments,
+                                    pagination: {
+                                                total,
+                                                page,
+                                                limit,
+                                                totalPages: Math.ceil(total / limit)
                                     }
                         });
 
@@ -112,11 +152,11 @@ export const enrollCourse = async (req, res, next) => {
                                                 success: false,
                                                 message: "This course requires payment. Please proceed to checkout."
                                     });
-                        }/////////NEW
+                        }
 
                         // check if student is already enrolled
                         const existingEnrollment = await Enrollment.findOne({
-                                    studentId: req.user.id,//correction
+                                    studentId: req.user.id,
                                     courseId: courseId
                         });
 
@@ -129,7 +169,7 @@ export const enrollCourse = async (req, res, next) => {
 
                         // create enrollment
                         const enrollment = await Enrollment.create({
-                                    studentId: req.user.id,//corrections
+                                    studentId: req.user.id,
                                     courseId: courseId,
                                     completedLessonsId: [],
                                     progress: 0
@@ -137,12 +177,12 @@ export const enrollCourse = async (req, res, next) => {
 
                         // add student to course enrolledStudents
                         await Course.findByIdAndUpdate(courseId, {
-                                    $push: { enrolledStudentsId: req.user.id }//corrections
+                                    $push: { enrolledStudentsId: req.user.id }
                         });
 
                         // add course to student enrolledCourses
                         await User.findByIdAndUpdate(req.user.id, {
-                                    $push: { enrolledCoursesId: courseId }//corrections
+                                    $push: { enrolledCoursesId: courseId }
                         });
 
                         return res.status(201).json({
