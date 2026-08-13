@@ -44,6 +44,56 @@ export const getStudentDashboard = async (req, res, next) => {
             }
 };
 
+export const getMyStreak = async (req, res, next) => {
+            try {
+                        const user = await User.findById(req.user.id).select('currentStreak longestStreak lastActiveDate');
+
+                        if (!user) {
+                                    return res.status(404).json({
+                                                success: false,
+                                                message: "User not found"
+                                    });
+                        }
+
+                        return res.status(200).json({
+                                    success: true,
+                                    data: {
+                                                currentStreak: user.currentStreak,
+                                                longestStreak: user.longestStreak,
+                                                lastActiveDate: user.lastActiveDate
+                                    }
+                        });
+
+            } catch (error) {
+                        next(error);
+            }
+};
+
+// ---- XP ----
+// GET /api/student/xp
+export const getMyXp = async (req, res, next) => {
+            try {
+                        const user = await User.findById(req.user.id).select('xp');
+
+                        if (!user) {
+                                    return res.status(404).json({
+                                                success: false,
+                                                message: "User not found"
+                                    });
+                        }
+
+                        return res.status(200).json({
+                                    success: true,
+                                    data: {
+                                                xp: user.xp
+                                    }
+                        });
+
+            } catch (error) {
+                        next(error);
+            }
+}; //// changes
+
 // ---- MY LEARNING (full enrolled courses list) ----
 // GET /api/student/my-courses
 export const getMyCourses = async (req, res, next) => {
@@ -277,6 +327,8 @@ export const getLessonResources = async (req, res, next) => {
             }
 };
 
+const XP_PER_LESSON = 10;   //changes
+
 // ---- PROGRESS TRACKING ----
 // POST /api/student/lessons/complete
 export const markLessonComplete = async (req, res, next) => {
@@ -310,9 +362,20 @@ export const markLessonComplete = async (req, res, next) => {
                                     .map(id => id.toString())
                                     .includes(lessonId);
 
+                        let xpAwarded = 0; //change
+
                         if (!alreadyCompleted) {
                                     enrollment.completedLessonsId.push(lessonId);
+
+                                    // only award XP the first time this specific lesson is completed —
+                                    // alreadyCompleted being false guarantees this can't be re-triggered
+                                    // by calling the endpoint again for the same lesson
+                                    xpAwarded = XP_PER_LESSON;
+                                    await User.findByIdAndUpdate(req.user.id, {
+                                                $inc: { xp: XP_PER_LESSON }
+                                    }); ///change
                         }
+
 
                         // recalculate progress
                         const totalLessons = await Lesson.countDocuments({ courseId: lesson.courseId });
@@ -335,7 +398,8 @@ export const markLessonComplete = async (req, res, next) => {
                                                 progress: enrollment.progress,
                                                 isCompleted: enrollment.isCompleted,
                                                 completedLessonsId: enrollment.completedLessonsId.length,
-                                                totalLessons
+                                                totalLessons,
+                                                xpAwarded
                                     }
                         });
 

@@ -11,12 +11,12 @@ import authMiddleware, { studentOnly, adminOnly } from '../middlewares/authMiddl
 
 const instructorApplicationRoutes = express.Router();
 
-// ---- STUDENT ROUTES ----
+//STUDENT ROUTES
 instructorApplicationRoutes.post('/apply', authMiddleware, studentOnly, validate(instructorApplicationSchema), applyToBeInstructor);
 instructorApplicationRoutes.get('/myapplication', authMiddleware, getMyApplication);
 instructorApplicationRoutes.delete('/withdraw', authMiddleware, studentOnly, withdrawApplication);
 
-// ---- ADMIN ROUTES ----
+//ADMIN ROUTES
 instructorApplicationRoutes.get('/all', authMiddleware, adminOnly, getAllApplications);
 instructorApplicationRoutes.get('/:applicationId', authMiddleware, adminOnly, getSingleApplication);
 instructorApplicationRoutes.patch('/:applicationId/review', authMiddleware, adminOnly, validate(reviewApplicationSchema), reviewApplication);

@@ -9,7 +9,7 @@ import { deleteFromCloudinary, getPublicIdFromUrl } from '../utils/cloudinaryHel
 
 //
 
-// ---- INSTRUCTOR DASHBOARD ----
+// INSTRUCTOR DASHBOARD
 // GET /api/instructor/dashboard
 export const getInstructorDashboard = async (req, res, next) => {
             try {
@@ -53,8 +53,7 @@ export const getInstructorDashboard = async (req, res, next) => {
             }
 };
 
-// ---- COURSE CREATION AND MANAGEMENT ----
-
+//COURSE CREATION AND MANAGEMENT 
 // POST /api/instructor/courses
 export const createCourse = async (req, res, next) => {
             try {
@@ -295,7 +294,7 @@ export const togglePublishCourse = async (req, res, next) => {
 
 
 
-// ---- LESSON MANAGEMENT ----
+//LESSON MANAGEMENT
 export const createLesson = async (req, res, next) => {
             try {
                         if (!req.file) {
@@ -528,8 +527,8 @@ export const deleteLesson = async (req, res, next) => {
                         next(error);
             }
 };
+
 // POST /api/instructor/lessons/:lessonId/resources
-// upload pdf, doc, ppt, xls, zip to a lesson
 export const uploadLessonResource = async (req, res, next) => {
             try {
 
@@ -587,7 +586,6 @@ export const uploadLessonResource = async (req, res, next) => {
 };
 
 // DELETE /api/instructor/lessons/:lessonId/resources/:resourceId
-// delete a resource from a lesson
 export const deleteLessonResource = async (req, res, next) => {
             try {
                         const lesson = await Lesson.findById(req.params.lessonId);
@@ -634,8 +632,7 @@ export const deleteLessonResource = async (req, res, next) => {
             }
 };
 
-// ---- QUIZ CREATION ----
-
+// QUIZ CREATION 
 // POST /api/instructor/courses/:courseId/quizzes
 export const createQuiz = async (req, res, next) => {
             try {
@@ -740,8 +737,7 @@ export const deleteQuiz = async (req, res, next) => {
             }
 };
 
-// ---- STUDENT PROGRESS MONITORING ----
-
+// STUDENT PROGRESS MONITORING
 // GET /api/instructor/courses/:courseId/students
 export const getCourseStudents = async (req, res, next) => {
             try {

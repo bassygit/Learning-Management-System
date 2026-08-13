@@ -3,7 +3,7 @@ import InstructorApplication from '../models/instructorApplicationModel.js';
 import InstructorProfile from '../models/instructorModel.js';
 import sendEmail from '../utils/sendEmail.js';
 
-// ---- STUDENT SIDE ----
+//STUDENT SIDE 
 
 // POST /api/instructor-application/apply
 export const applyToBeInstructor = async (req, res, next) => {
@@ -174,7 +174,7 @@ export const withdrawApplication = async (req, res, next) => {
   }
 };
 
-// ---- ADMIN SIDE ----
+//ADMIN SIDE
 
 // GET /api/instructor-application/all
 export const getAllApplications = async (req, res, next) => {

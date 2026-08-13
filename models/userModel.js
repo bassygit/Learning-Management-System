@@ -49,6 +49,27 @@ const userSchema = new mongoose.Schema({
             activeSubscription: {
                         type: mongoose.Schema.Types.ObjectId,
                         ref: 'UserSubscription'
+            },
+            xp: {
+                        type: Number,
+                        default: 0,
+                        min: 0
+            },
+            currentStreak: {
+                        type: Number,
+                        default: 0,
+                        min: 0
+            },
+            longestStreak: {
+                        type: Number,
+                        default: 0,
+                        min: 0
+            },
+            // the last calendar date (midnight-normalized) this user was
+            // credited with streak activity — used to detect same-day /
+            // consecutive-day / missed-day logins
+            lastActiveDate: {
+                        type: Date
             }
 }, { timestamps: true });
 

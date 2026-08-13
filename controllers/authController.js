@@ -72,6 +72,45 @@ export const login = async (req, res, next) => {
                                     });
                         }
 
+
+                        // ---- STREAK TRACKING ----
+                        // normalize "today" to midnight so we're comparing calendar
+                        // days, not exact timestamps
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+
+                        if (user.lastActiveDate) {
+                                    const lastActive = new Date(user.lastActiveDate);
+                                    lastActive.setHours(0, 0, 0, 0);
+
+                                    // difference in whole days between today and their last active day
+                                    const diffDays = Math.round((today - lastActive) / (1000 * 60 * 60 * 24));
+
+                                    if (diffDays === 0) {
+                                                // already logged in today — streak unchanged, do nothing
+                                    } else if (diffDays === 1) {
+                                                // logged in yesterday, then today — streak continues
+                                                user.currentStreak += 1;
+                                                user.lastActiveDate = today;
+                                    } else {
+                                                // missed at least one day — streak resets to a fresh day 1
+                                                user.currentStreak = 1;
+                                                user.lastActiveDate = today;
+                                    }
+                        } else {
+                                    // very first login ever recorded
+                                    user.currentStreak = 1;
+                                    user.lastActiveDate = today;
+                        }
+
+                        // track the best streak they've ever hit
+                        if (user.currentStreak > user.longestStreak) {
+                                    user.longestStreak = user.currentStreak;
+                        }
+
+                        await user.save();
+
+
                         // generate token
                         const token = await generateToken({
                                     id: user._id,
@@ -82,7 +121,11 @@ export const login = async (req, res, next) => {
                         return res.status(200).json({
                                     success: true,
                                     message: "Login successful",
-                                    token
+                                    token,
+                                    data: {
+                                                currentStreak: user.currentStreak,
+                                                longestStreak: user.longestStreak
+                                    }
                         });
 
             } catch (error) {
@@ -216,9 +259,7 @@ export const changePassword = async (req, res, next) => {
             }
 };
 
-// ---- FORGOT PASSWORD ----
-
-// STEP 1 — REQUEST OTP
+//FORGOT PASSWORD
 // POST /api/auth/forgot-password
 export const forgotPassword = async (req, res, next) => {
             try {
@@ -277,9 +318,8 @@ export const forgotPassword = async (req, res, next) => {
             }
 };
 
-// ==========================================
-// 8. FORGOT PASSWORD — STEP 2: VERIFY OTP   //FIXED
-// ==========================================
+
+//VERIFY OTP  
 // POST /api/auth/verify-otp
 export const verifyOTP = async (req, res, next) => {
             try {

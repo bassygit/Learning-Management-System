@@ -1,9 +1,8 @@
 import Course from '../models/courseModel.js';
 import Lesson from '../models/lessonModel.js';
 
-// ---- PUBLIC COURSE CATALOGUE ----
+// PUBLIC COURSE CATALOGUE
 // GET /courses
-// No auth required. Anyone can browse published courses.
 export const getPublicCourseCatalog = async (req, res, next) => {
             try {
                         const page = parseInt(req.query.page) || 1;
@@ -21,7 +20,6 @@ export const getPublicCourseCatalog = async (req, res, next) => {
                         }
 
                         // search by title or description
-                        // e.g. GET /courses?search=react
                         if (req.query.search) {
                                     // escape regex special characters so a user's search text
                                     // (e.g. "c++", "a.b") can't break or hijack the query
@@ -58,9 +56,8 @@ export const getPublicCourseCatalog = async (req, res, next) => {
             }
 };
 
-// ---- PUBLIC SINGLE COURSE DETAIL ----
+//PUBLIC SINGLE COURSE DETAIL
 // GET /courses/:courseId
-// No auth required.
 export const getPublicCourseDetail = async (req, res, next) => {
             try {
                         const { courseId } = req.params;
@@ -90,9 +87,9 @@ export const getPublicCourseDetail = async (req, res, next) => {
             }
 };
 
-// ---- PUBLIC PREVIEW LESSONS ----
+// PUBLIC PREVIEW LESSONS
 // GET /courses/:courseId/lessons
-// No auth required. Only returns lessons marked isPreview: true,
+// Only returns lessons marked isPreview: true,
 // and only safe metadata — never the full lesson set, and no
 // gated resources for non-preview lessons.
 export const getPublicCourseLessons = async (req, res, next) => {

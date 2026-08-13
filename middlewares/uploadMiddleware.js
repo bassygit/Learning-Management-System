@@ -2,7 +2,7 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import cloudinary from '../config/cloudinary.js';
 
-// ---- COURSE THUMBNAIL ----
+//COURSE THUMBNAIL
 export const thumbnailStorage = new CloudinaryStorage({
             cloudinary,
             params: {
@@ -14,7 +14,7 @@ export const thumbnailStorage = new CloudinaryStorage({
             }
 });
 
-// ---- LESSON VIDEOS ----
+//LESSON VIDEOS
 export const videoStorage = new CloudinaryStorage({
             cloudinary,
             params: {
@@ -24,7 +24,7 @@ export const videoStorage = new CloudinaryStorage({
             }
 });
 
-// ---- LESSON RESOURCES (PDF, DOC, PPT, XLS, ZIP) ----
+// LESSON RESOURCES 
 export const resourceStorage = new CloudinaryStorage({
             cloudinary,
             params: (req, file) => {
@@ -45,7 +45,7 @@ export const resourceStorage = new CloudinaryStorage({
             }
 });
 
-// ---- USER AVATAR ----
+//USER AVATAR
 export const avatarStorage = new CloudinaryStorage({
             cloudinary,
             params: {
@@ -57,7 +57,7 @@ export const avatarStorage = new CloudinaryStorage({
             }
 });
 
-// ---- FILE SIZE LIMITS ----
+// FILE SIZE LIMITS
 export const thumbnailUpload = multer({
             storage: thumbnailStorage,
             limits: { fileSize: 5 * 1024 * 1024 }  // 5MB max for thumbnails

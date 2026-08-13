@@ -9,7 +9,7 @@ import SubscriptionPlan from '../models/subcriptionModel.js';
 import UserSubscription from '../models/userSubcriptionModel.js';
 import sendEmail from '../utils/sendEmail.js'
 
-// ---- HELPER FUNCTIONS ----
+//HELPER FUNCTIONS
 
 // generate unique payment reference
 const generatePaymentRef = () => {
@@ -38,7 +38,7 @@ const paystackAPI = axios.create({
             }
 });
 
-// ---- 1. INITIALIZE PAYMENT ----
+//INITIALIZE PAYMENT
 
 // POST /api/payment/initialize
 export const initializePayment = async (req, res, next) => {
@@ -99,7 +99,7 @@ export const initializePayment = async (req, res, next) => {
                                     paymentData.courseId = courseId;
                         }
 
-                        // ---- SUBSCRIPTION PAYMENT ----
+                        //SUBSCRIPTION PAYMENT
                         if (type === 'subscription') {
                                     if (!planId) {
                                                 return res.status(400).json({
@@ -150,7 +150,7 @@ export const initializePayment = async (req, res, next) => {
                                     status: 'pending'
                         });
 
-                        // ---- CALL PAYSTACK INITIALIZE ----
+                        //CALL PAYSTACK INITIALIZE
                         const paystackResponse = await paystackAPI.post(
                                     '/transaction/initialize',
                                     {
@@ -211,7 +211,7 @@ export const initializePayment = async (req, res, next) => {
             }
 };
 
-// ---- 2. VERIFY PAYMENT ----
+//VERIFY PAYMENT
 
 // POST /api/payment/verify
 export const verifyPayment = async (req, res, next) => {
@@ -235,7 +235,7 @@ export const verifyPayment = async (req, res, next) => {
                                     });
                         }
 
-                        // ---- CALL PAYSTACK VERIFY ----
+                        // CALL PAYSTACK VERIFY 
                         const paystackResponse = await paystackAPI.get(
                                     `/transaction/verify/${reference}`
                         );
@@ -285,7 +285,7 @@ export const verifyPayment = async (req, res, next) => {
 
                         await payment.save();
 
-                        // ---- FULFILL PAYMENT ----
+                        //FULFILL PAYMENT
                         await fulfillPayment(payment);
 
                         return res.status(200).json({
@@ -306,7 +306,7 @@ export const verifyPayment = async (req, res, next) => {
             }
 };
 
-// ---- 3. PAYSTACK WEBHOOK ----
+// PAYSTACK WEBHOOK
 
 // POST /api/payment/webhook
 // called automatically by paystack after payment
@@ -316,7 +316,7 @@ export const verifyPayment = async (req, res, next) => {
 // below will fail on every real Paystack webhook call.
 export const paystackWebhook = async (req, res, next) => {
             try {
-                        // ---- VERIFY WEBHOOK SIGNATURE ----
+                        // VERIFY WEBHOOK SIGNATURE
                         // req.body is a raw Buffer here (see app.js wiring) — hash the
                         // raw bytes, not a JSON.stringify of an already-parsed object,
                         // or the signature will never match.
@@ -337,7 +337,7 @@ export const paystackWebhook = async (req, res, next) => {
                         const event = JSON.parse(req.body);
                         console.log('Paystack webhook event:', event.event);
 
-                        // ---- HANDLE DIFFERENT EVENTS ----
+                        // HANDLE DIFFERENT EVENTS
                         switch (event.event) {
 
                                     // payment was successful
@@ -410,7 +410,7 @@ export const paystackWebhook = async (req, res, next) => {
             }
 };
 
-// ---- FULFILL PAYMENT HELPER ----
+// FULFILL PAYMENT HELPER
 // called after payment is verified — both from verify and webhook
 const fulfillPayment = async (payment) => {
             // ---- FULFILL COURSE PURCHASE ----
@@ -445,7 +445,7 @@ const fulfillPayment = async (payment) => {
                                     });
                         }
 
-                        // ---- NOTIFY (course purchase) ----
+                        // NOTIFY (course purchase)
                         // wrapped in its own try/catch so a failed email never undoes
                         // an already-successful payment/enrollment
                         try {
@@ -538,8 +538,7 @@ const fulfillPayment = async (payment) => {
             }
 };
 
-// ---- INVOICE ----
-
+//INVOICE
 // GET /api/payment/invoice/:reference
 export const getInvoice = async (req, res, next) => {
             try {

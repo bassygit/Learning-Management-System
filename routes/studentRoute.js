@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getStudentDashboard, getMyCourses, getCourseCatalog, enrollCourse, getCourseLessons, getLessonResources, markLessonComplete, getCourseProgress, getCourseQuizzes, submitQuiz, generateCertificate, getStudentCertificates } from '../controllers/studentController.js';
+import { getStudentDashboard, getMyStreak, getMyXp, getMyCourses, getCourseCatalog, enrollCourse, getCourseLessons, getLessonResources, markLessonComplete, getCourseProgress, getCourseQuizzes, submitQuiz, generateCertificate, getStudentCertificates } from '../controllers/studentController.js';
 
 import validate from '../validators/studentValidator.js';
 
@@ -10,12 +10,19 @@ import authMiddleware, { studentOnly } from '../middlewares/authMiddleware.js';
 
 const StudentRoutes = express.Router();
 
-// ALL STUDENT ROUTES NEED AUTH
 
 // dashboard
 StudentRoutes.get('/dashboard', authMiddleware, studentOnly, getStudentDashboard);
 
+
+StudentRoutes.get('/streak', authMiddleware, getMyStreak);
+
+
+StudentRoutes.get('/xp', authMiddleware, getMyXp);
+
+
 StudentRoutes.get('/mycourses', authMiddleware, getMyCourses);
+
 
 // course catalog
 StudentRoutes.get('/courses', authMiddleware, studentOnly, getCourseCatalog);

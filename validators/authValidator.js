@@ -58,7 +58,7 @@ export const changePasswordSchema = Joi.object({
                         'any.required': 'New password is required'
             }),
 });
-// forgot password — step 1 — request OTP
+// forgot password
 export const forgotPasswordSchema = Joi.object({
             email: Joi.string().email().lowercase().required().messages({
                         'string.email': 'Please provide a valid email',
@@ -67,7 +67,7 @@ export const forgotPasswordSchema = Joi.object({
             }),
 });
 
-// verify OTP — step 2 — verify OTP
+// verify OTP 
 export const verifyOTPSchema = Joi.object({
             email: Joi.string().email().lowercase().required().messages({
                         'string.email': 'Please provide a valid email',
@@ -81,7 +81,7 @@ export const verifyOTPSchema = Joi.object({
             }),
 });
 
-// reset password — step 3 — set new password
+// reset password
 export const resetPasswordSchema = Joi.object({
             resetToken: Joi.string().required().messages({
                         'string.empty': 'Reset token missing. Please verify your OTP again.',

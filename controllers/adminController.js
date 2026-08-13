@@ -8,7 +8,7 @@ import InstructorProfile from '../models/instructorModel.js';
 import Report from '../models/reportModel.js';
 import QuizResult from '../models/quizresultModel.js';
 
-// ---- USER MANAGEMENT ----
+// USER MANAGEMENT 
 
 // GET /api/admin/users
 export const getAllUsers = async (req, res, next) => {
@@ -261,8 +261,7 @@ export const getStudentDetails = async (req, res, next) => {
             }
 };
 
-// ---- INSTRUCTOR MANAGEMENT ----
-
+//INSTRUCTOR MANAGEMENT 
 // GET /api/admin/instructors
 export const getAllInstructors = async (req, res, next) => {
             try {
@@ -374,7 +373,7 @@ export const verifyInstructor = async (req, res, next) => {
             }
 };
 
-// ---- COURSE MANAGEMENT ----
+//COURSE MANAGEMENT
 
 // GET /api/admin/courses
 export const getAllCourses = async (req, res, next) => {
@@ -502,8 +501,7 @@ export const moderateCourse = async (req, res, next) => {
             }
 };
 
-// ---- ANALYTICS AND REPORTING ----
-
+//ANALYTICS AND REPORTING
 // GET /api/admin/analytics
 export const getAnalytics = async (req, res, next) => {
             try {
