@@ -9,7 +9,7 @@ import QuizResult from '../models/quizresultModel.js';
 
 
 
-// ---- STUDENT DASHBOARD ----
+// STUDENT DASHBOARD
 // GET /api/student/dashboard
 export const getStudentDashboard = async (req, res, next) => {
             try {
@@ -69,7 +69,7 @@ export const getMyStreak = async (req, res, next) => {
             }
 };
 
-// ---- XP ----
+// XP 
 // GET /api/student/xp
 export const getMyXp = async (req, res, next) => {
             try {
@@ -92,9 +92,9 @@ export const getMyXp = async (req, res, next) => {
             } catch (error) {
                         next(error);
             }
-}; //// changes
+};
 
-// ---- MY LEARNING (full enrolled courses list) ----
+//MY LEARNING (full enrolled courses list)
 // GET /api/student/my-courses
 export const getMyCourses = async (req, res, next) => {
             try {
@@ -132,7 +132,7 @@ export const getMyCourses = async (req, res, next) => {
             }
 };
 
-// ---- COURSE CATALOG ----
+// COURSE CATALOG 
 // GET/api/student/courses
 export const getCourseCatalog = async (req, res, next) => {
             try {
@@ -176,7 +176,7 @@ export const getCourseCatalog = async (req, res, next) => {
             }
 };
 
-// ---- COURSE ENROLLMENT ----
+// COURSE ENROLLMENT
 // POST /api/student/enroll
 export const enrollCourse = async (req, res, next) => {
             try {
@@ -246,7 +246,7 @@ export const enrollCourse = async (req, res, next) => {
             }
 };
 
-// ---- VIDEO LESSONS ----
+//VIDEO LESSONS
 // GET /api/student/courses/:courseId/lessons
 export const getCourseLessons = async (req, res, next) => {
             try {
@@ -289,7 +289,7 @@ export const getCourseLessons = async (req, res, next) => {
             }
 };
 
-// ---- DOWNLOADABLE RESOURCES ----
+//DOWNLOADABLE RESOURCES
 // GET /api/student/lessons/:lessonId/resources
 export const getLessonResources = async (req, res, next) => {
             try {
@@ -327,9 +327,9 @@ export const getLessonResources = async (req, res, next) => {
             }
 };
 
-const XP_PER_LESSON = 10;   //changes
+const XP_PER_LESSON = 10;
 
-// ---- PROGRESS TRACKING ----
+//PROGRESS TRACKING
 // POST /api/student/lessons/complete
 export const markLessonComplete = async (req, res, next) => {
             try {
@@ -443,7 +443,7 @@ export const getCourseProgress = async (req, res, next) => {
             }
 };
 
-// ---- QUIZZES AND ASSESSMENTS ----
+//  QUIZZES AND ASSESSMENTS
 // GET /api/student/courses/:courseId/quizzes
 export const getCourseQuizzes = async (req, res, next) => {
             try {
@@ -543,7 +543,7 @@ export const submitQuiz = async (req, res, next) => {
             }
 };
 
-// ---- CERTIFICATE GENERATION ----
+//CERTIFICATE
 // POST /api/student/courses/:courseId/certificate
 export const generateCertificate = async (req, res, next) => {
             try {
@@ -551,8 +551,8 @@ export const generateCertificate = async (req, res, next) => {
 
                         // check enrollment
                         const enrollment = await Enrollment.findOne({
-                                    student: req.user.id,
-                                    course: courseId
+                                    studentId: req.user.id,
+                                    courseId: courseId
                         });
 
                         if (!enrollment) {
@@ -572,8 +572,8 @@ export const generateCertificate = async (req, res, next) => {
 
                         // check if certificate already exists
                         const existingCertificate = await Certificate.findOne({
-                                    student: req.user.id,
-                                    course: courseId
+                                    studentId: req.user.id,
+                                    courseId: courseId
                         });
 
                         if (existingCertificate) {
@@ -589,9 +589,9 @@ export const generateCertificate = async (req, res, next) => {
 
                         // create certificate
                         const certificate = await Certificate.create({
-                                    student: req.user.id,
-                                    course: courseId,
-                                    enrollment: enrollment._id,
+                                    studentId: req.user.id,
+                                    courseId: courseId,
+                                    enrollmentId: enrollment._id,
                                     certificateId
                         });
 
@@ -614,7 +614,7 @@ export const generateCertificate = async (req, res, next) => {
 // GET /api/student/certificates
 export const getStudentCertificates = async (req, res, next) => {
             try {
-                        const certificates = await Certificate.find({ student: req.user.id })
+                        const certificates = await Certificate.find({ studentId: req.user.id })
                                     .populate('course', 'title thumbnail instructor')
                                     .sort({ createdAt: -1 });
 

@@ -66,30 +66,54 @@
 //
 // Usage:  node migrations/backfillStreakFields.js
 
-import 'dotenv/config';
-import mongoose from 'mongoose';
-import User from '../models/userModel.js';
+// import 'dotenv/config';
+// import mongoose from 'mongoose';
+// import User from '../models/userModel.js';
 
-const run = async () => {
-            await mongoose.connect(process.env.MONGO_URI);
+// const run = async () => {
+//             await mongoose.connect(process.env.MONGO_URI);
 
-            const result = await User.updateMany(
-                        { currentStreak: { $exists: false } },
-                        {
-                                    $set: {
-                                                currentStreak: 0,
-                                                longestStreak: 0,
-                                                lastActiveDate: null
-                                    }
-                        }
-            );
-            console.log(`currentStreak / longestStreak / lastActiveDate backfilled on ${result.modifiedCount} users`);
+//             const result = await User.updateMany(
+//                         { currentStreak: { $exists: false } },
+//                         {
+//                                     $set: {
+//                                                 currentStreak: 0,
+//                                                 longestStreak: 0,
+//                                                 lastActiveDate: null
+//                                     }
+//                         }
+//             );
+//             console.log(`currentStreak / longestStreak / lastActiveDate backfilled on ${result.modifiedCount} users`);
 
-            await mongoose.disconnect();
-            console.log('Done.');
-};
+//             await mongoose.disconnect();
+//             console.log('Done.');
+// };
 
-run().catch((err) => {
-            console.error('Migration failed:', err);
-            process.exit(1);
-});
+// run().catch((err) => {
+//             console.error('Migration failed:', err);
+//             process.exit(1);
+// });
+
+
+
+// import 'dotenv/config';
+// import mongoose from 'mongoose';
+// import User from '../models/userModel.js';
+
+// const run = async () => {
+//             await mongoose.connect(process.env.MONGO_URI);
+
+//             const result = await User.updateMany(
+//                         { streakDates: { $exists: false } },
+//                         { $set: { streakDates: [] } }
+//             );
+//             console.log(`streakDates backfilled on ${result.modifiedCount} users`);
+
+//             await mongoose.disconnect();
+//             console.log('Done.');
+// };
+
+// run().catch((err) => {
+//             console.error('Migration failed:', err);
+//             process.exit(1);
+// });

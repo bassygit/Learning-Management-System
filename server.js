@@ -20,6 +20,7 @@ app.use(express.json());
 const allowedOrigins = [
             "http://localhost:5173",
             "http://localhost:3001",
+            "https://vercity-lms-nwdw.vercel.app",
             //"http://localhost:3002",
 ];
 
