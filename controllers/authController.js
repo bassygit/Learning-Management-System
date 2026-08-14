@@ -8,7 +8,7 @@ import { otpEmailTemplate } from '../utils/emailTemplates.js';
 import jwt from 'jsonwebtoken';
 import BlacklistedToken from '../models/blacklistedTokenModel.js';
 
-// ---- REGISTER ----
+// REGISTER 
 // POST /api/auth/register
 export const register = async (req, res, next) => {
             try {
@@ -29,6 +29,18 @@ export const register = async (req, res, next) => {
                                     email,
                                     password
                         });
+                        sendEmail({
+                                    to: user.email,
+                                    subject: "Welcome to Vercity!",
+                                    html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2>Welcome to Vercity, ${user.name}!</h2>
+                    <p>Thank you for using our platform, which best serves your dream and passion for learning.</p>
+                </div>
+            `
+                        }).catch((error) => {
+                                    console.error("Failed to send welcome email:", error);
+                        });
 
                         return res.status(201).json({
                                     success: true,
@@ -40,7 +52,7 @@ export const register = async (req, res, next) => {
             }
 };
 
-// ---- LOGIN ----
+//LOGIN 
 // POST /api/auth/login
 export const login = async (req, res, next) => {
             try {
@@ -157,7 +169,7 @@ export const logout = async (req, res, next) => {
 
 
 
-// ---- GET PROFILE ----
+// GET PROFILE 
 // GET /api/auth/me
 export const getProfile = async (req, res, next) => {
             try {
@@ -176,7 +188,7 @@ export const getProfile = async (req, res, next) => {
             }
 };
 
-// ---- UPDATE PROFILE ----
+//UPDATE PROFILE 
 // PATCH /api/auth/me
 export const updateProfile = async (req, res, next) => {
             try {
@@ -218,7 +230,7 @@ export const updateProfile = async (req, res, next) => {
             }
 };
 
-// ---- CHANGE PASSWORD ----
+//CHANGE PASSWORD
 // PATCH /api/auth/change-password
 export const changePassword = async (req, res, next) => {
             try {
