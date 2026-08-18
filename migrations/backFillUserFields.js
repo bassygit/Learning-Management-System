@@ -117,3 +117,54 @@
 //             console.error('Migration failed:', err);
 //             process.exit(1);
 // });
+
+
+
+// import 'dotenv/config';
+// import mongoose from 'mongoose';
+// import User from '../models/userModel.js';
+
+// const run = async () => {
+//             await mongoose.connect(process.env.MONGO_URI);
+
+//             const result = await User.updateMany(
+//                         { isVerified: { $exists: false } },
+//                         { $set: { isVerified: true } }
+//             );
+
+//             console.log(`Updated ${result.modifiedCount} existing users to isVerified: true`);
+//             await mongoose.disconnect();
+// };
+
+// run();
+
+
+// migrations/backfillStreakDates.js
+//
+// Run once, after deploying the updated userModel.js, to give existing
+// user documents the streakDates field. Safe to run multiple times —
+// it only touches documents where streakDates is missing.
+//
+// Usage:  node migrations/backfillStreakDates.js
+
+import 'dotenv/config';
+import mongoose from 'mongoose';
+import User from '../models/userModel.js';
+
+const run = async () => {
+            await mongoose.connect(process.env.MONGO_URI);
+
+            const result = await User.updateMany(
+                        { streakDates: { $exists: false } },
+                        { $set: { streakDates: [] } }
+            );
+            console.log(`streakDates backfilled on ${result.modifiedCount} users`);
+
+            await mongoose.disconnect();
+            console.log('Done.');
+};
+
+run().catch((err) => {
+            console.error('Migration failed:', err);
+            process.exit(1);
+});

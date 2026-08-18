@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
                         type: Boolean,
                         default: true
             },
+            isVerified: {
+                        type: Boolean,
+                        default: false
+            },
             purchasedCourses: [{
                         type: mongoose.Schema.Types.ObjectId,
                         ref: 'Course'
@@ -65,13 +69,21 @@ const userSchema = new mongoose.Schema({
                         default: 0,
                         min: 0
             },
-            // the last calendar date (midnight-normalized) this user was
-            // credited with streak activity — used to detect same-day /
-            // consecutive-day / missed-day logins
             lastActiveDate: {
                         type: Date
-            }
+            },
+            streakDates: [{
+                        type: Date
+            }]
 }, { timestamps: true });
+
+userSchema.index(
+            { createdAt: 1 },
+            {
+                        expireAfterSeconds: 24 * 60 * 60,
+                        partialFilterExpression: { isVerified: false }
+            }
+);
 
 userSchema.pre('save', async function () {
             if (!this.isModified('password')) return;

@@ -6,6 +6,7 @@ import Certificate from '../models/certificateModel.js';
 import User from '../models/userModel.js';
 import crypto from 'crypto';
 import QuizResult from '../models/quizresultModel.js';
+import XpLog from '../models/xPlogModel.js';
 
 
 
@@ -46,7 +47,7 @@ export const getStudentDashboard = async (req, res, next) => {
 
 export const getMyStreak = async (req, res, next) => {
             try {
-                        const user = await User.findById(req.user.id).select('currentStreak longestStreak lastActiveDate');
+                        const user = await User.findById(req.user.id).select('currentStreak longestStreak lastActiveDate streakDates');
 
                         if (!user) {
                                     return res.status(404).json({
@@ -60,7 +61,8 @@ export const getMyStreak = async (req, res, next) => {
                                     data: {
                                                 currentStreak: user.currentStreak,
                                                 longestStreak: user.longestStreak,
-                                                lastActiveDate: user.lastActiveDate
+                                                lastActiveDate: user.lastActiveDate,
+                                                days: (user.streakDates || []).map(d => d.toISOString().split('T')[0])
                                     }
                         });
 
@@ -68,6 +70,10 @@ export const getMyStreak = async (req, res, next) => {
                         next(error);
             }
 };
+
+// XP needed per level — simple flat curve for now (adjust freely later,
+// this is a placeholder until a real leveling curve is designed)
+const XP_PER_LEVEL = 100;
 
 // XP 
 // GET /api/student/xp
@@ -81,11 +87,28 @@ export const getMyXp = async (req, res, next) => {
                                                 message: "User not found"
                                     });
                         }
+                        // start of the current calendar week (Monday, midnight)
+                        const now = new Date();
+                        const startOfWeek = new Date(now);
+                        const day = startOfWeek.getDay(); // 0 = Sunday, 1 = Monday, ...
+                        const diffToMonday = day === 0 ? 6 : day - 1;
+                        startOfWeek.setDate(startOfWeek.getDate() - diffToMonday);
+                        startOfWeek.setHours(0, 0, 0, 0);
+
+                        const weeklyLogs = await XpLog.find({
+                                    userId: req.user.id,
+                                    createdAt: { $gte: startOfWeek }
+                        });
+
+                        const weeklyXP = weeklyLogs.reduce((sum, log) => sum + log.amount, 0);
+                        const level = Math.floor(user.xp / XP_PER_LEVEL) + 1;
 
                         return res.status(200).json({
                                     success: true,
                                     data: {
-                                                xp: user.xp
+                                                totalXP: user.xp,
+                                                weeklyXP,
+                                                level
                                     }
                         });
 
@@ -373,7 +396,16 @@ export const markLessonComplete = async (req, res, next) => {
                                     xpAwarded = XP_PER_LESSON;
                                     await User.findByIdAndUpdate(req.user.id, {
                                                 $inc: { xp: XP_PER_LESSON }
-                                    }); ///change
+                                    });
+
+                                    // log the individual event so weekly XP can be calculated later —
+                                    // without this, we'd only ever have the lifetime running total
+                                    await XpLog.create({
+                                                userId: req.user.id,
+                                                amount: XP_PER_LESSON,
+                                                source: 'lesson_complete',
+                                                lessonId: lesson._id
+                                    });
                         }
 
 

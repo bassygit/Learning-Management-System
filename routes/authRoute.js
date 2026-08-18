@@ -1,8 +1,8 @@
 import express from 'express';
-import { register, login, logout, getProfile, updateProfile, changePassword, forgotPassword, verifyOTP, resetPassword, resendOTP } from '../controllers/authController.js';
 
+import { register, verifyEmailOTP, resendEmailOTP, login, logout, getProfile, updateProfile, changePassword, forgotPassword, verifyOTP, resetPassword, resendOTP } from '../controllers/authController.js';
 import validate from '../validators/authValidator.js';
-import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema, verifyOTPSchema, resetPasswordSchema, } from '../validators/authValidator.js';
+import { registerSchema, verifyEmailOTPSchema, resendEmailOTPSchema, loginSchema, updateProfileSchema, changePasswordSchema, forgotPasswordSchema, verifyOTPSchema, resetPasswordSchema } from '../validators/authValidator.js';
 
 import authMiddleware from '../middlewares/authMiddleware.js';
 import { avatarUpload } from '../middlewares/uploadMiddleware.js'
@@ -11,7 +11,10 @@ const authRoutes = express.Router();
 
 // no auth needed — user has no token yet
 authRoutes.post('/register', validate(registerSchema), register);
+authRoutes.post('/verifyemailotp', validate(verifyEmailOTPSchema), verifyEmailOTP);
+authRoutes.post('/resendemailotp', validate(resendEmailOTPSchema), resendEmailOTP)
 authRoutes.post('/login', validate(loginSchema), login);
+
 
 //  auth required
 authRoutes.post('/logout', authMiddleware, logout);
