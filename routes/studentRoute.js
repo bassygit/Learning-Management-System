@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getStudentDashboard, getMyStreak, getMyXp, getMyCourses, getCourseCatalog, enrollCourse, getCourseLessons, getLessonResources, markLessonComplete, getCourseProgress, getCourseQuizzes, submitQuiz, generateCertificate, getStudentCertificates } from '../controllers/studentController.js';
+import { getStudentDashboard, getMyBadges, getMyStreak, getMyXp, getMyCourses, getCourseCatalog, enrollCourse, getCourseLessons, getLessonResources, markLessonComplete, getCourseProgress, getCourseQuizzes, submitQuiz, generateCertificate, getStudentCertificates } from '../controllers/studentController.js';
 
 import validate from '../validators/studentValidator.js';
 
@@ -13,6 +13,9 @@ const StudentRoutes = express.Router();
 
 // dashboard
 StudentRoutes.get('/dashboard', authMiddleware, studentOnly, getStudentDashboard);
+
+
+StudentRoutes.get('/badges', authMiddleware, getMyBadges);
 
 
 StudentRoutes.get('/streak', authMiddleware, getMyStreak);

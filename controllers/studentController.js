@@ -7,7 +7,9 @@ import User from '../models/userModel.js';
 import crypto from 'crypto';
 import QuizResult from '../models/quizresultModel.js';
 import XpLog from '../models/xPlogModel.js';
-
+import UserBadge from '../models/userBadgeModel.js';
+import awardBadge from '../utils/awardBadge.js';
+import { BADGES } from '../constants/badges.js'
 
 
 // STUDENT DASHBOARD
@@ -38,6 +40,28 @@ export const getStudentDashboard = async (req, res, next) => {
                                                 certificates: certificates.length,
                                                 recentCourses: enrollments.slice(0, 5), // last 5 courses
                                     }
+                        });
+
+            } catch (error) {
+                        next(error);
+            }
+};
+export const getMyBadges = async (req, res, next) => {
+            try {
+                        const earned = await UserBadge.find({ userId: req.user.id });
+                        const earnedMap = new Map(earned.map(b => [b.badgeCode, b.createdAt]));
+
+                        const catalog = Object.values(BADGES).map(badge => ({
+                                    code: badge.code,
+                                    title: badge.title,
+                                    description: badge.description,
+                                    earned: earnedMap.has(badge.code),
+                                    earnedAt: earnedMap.get(badge.code) || null
+                        }));
+
+                        return res.status(200).json({
+                                    success: true,
+                                    data: catalog
                         });
 
             } catch (error) {
@@ -388,6 +412,11 @@ export const markLessonComplete = async (req, res, next) => {
                         let xpAwarded = 0; //change
 
                         if (!alreadyCompleted) {
+
+                                    // capture this BEFORE pushing, so we can tell if this is
+                                    // genuinely their first completed lesson for this enrollment
+                                    const isFirstLessonForThisEnrollment = enrollment.completedLessonsId.length === 0;
+
                                     enrollment.completedLessonsId.push(lessonId);
 
                                     // only award XP the first time this specific lesson is completed —
@@ -406,6 +435,15 @@ export const markLessonComplete = async (req, res, next) => {
                                                 source: 'lesson_complete',
                                                 lessonId: lesson._id
                                     });
+                                    // BADGE: Quick Learner
+                                    // first lesson of THIS enrollment, completed within 24 hours
+                                    // of when the student enrolled in the course
+                                    if (isFirstLessonForThisEnrollment) {
+                                                const hoursSinceEnrolled = (Date.now() - enrollment.createdAt.getTime()) / (1000 * 60 * 60);
+                                                if (hoursSinceEnrolled <= 24) {
+                                                            await awardBadge(req.user.id, BADGES.QUICK_LEARNER.code);
+                                                }
+                                    }
                         }
 
 
