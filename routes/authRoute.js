@@ -19,7 +19,7 @@ authRoutes.post('/login', validate(loginSchema), login);
 //  auth required
 authRoutes.post('/logout', authMiddleware, logout);
 authRoutes.get('/me', authMiddleware, getProfile);
-authRoutes.patch('/update', authMiddleware, validate(updateProfileSchema), avatarUpload.single('avatar'), updateProfile);
+authRoutes.patch('/update', authMiddleware,avatarUpload.single('avatar'), updateProfile);
 authRoutes.patch('/changepassword', authMiddleware, validate(changePasswordSchema), changePassword);
 
 authRoutes.post('/forgotpassword', validate(forgotPasswordSchema), forgotPassword);
