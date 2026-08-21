@@ -225,9 +225,85 @@ export const getCourseCatalog = async (req, res, next) => {
 
 // COURSE ENROLLMENT
 // POST /api/student/enroll
+// export const enrollCourse = async (req, res, next) => {
+//             try {
+//                         const { courseId } = req.body;
+
+//                         // check if course exists and is published
+//                         const course = await Course.findById(courseId);
+//                         if (!course) {
+//                                     return res.status(404).json({
+//                                                 success: false,
+//                                                 message: "Course not found"
+//                                     });
+//                         }
+
+//                         if (!course.isPublished) {
+//                                     return res.status(400).json({
+//                                                 success: false,
+//                                                 message: "Course is not available yet"
+//                                     });
+//                         }
+//                         if (course.price > 0) {
+//                                     return res.status(400).json({
+//                                                 success: false,
+//                                                 message: "This course requires payment. Please proceed to checkout."
+//                                     });
+//                         }
+
+//                         // check if student is already enrolled
+//                         const existingEnrollment = await Enrollment.findOne({
+//                                     studentId: req.user.id,
+//                                     courseId: courseId
+//                         });
+
+//                         if (existingEnrollment) {
+//                                     return res.status(400).json({
+//                                                 success: false,
+//                                                 message: "You are already enrolled in this course"
+//                                     });
+//                         }
+
+//                         // create enrollment
+//                         const enrollment = await Enrollment.create({
+//                                     studentId: req.user.id,
+//                                     courseId: courseId,
+//                                     completedLessonsId: [],
+//                                     progress: 0
+//                         });
+
+//                         // add student to course enrolledStudents
+//                         await Course.findByIdAndUpdate(courseId, {
+//                                     $push: { enrolledStudentsId: req.user.id }
+//                         });
+
+//                         // add course to student enrolledCourses
+//                         await User.findByIdAndUpdate(req.user.id, {
+//                                     $push: { enrolledCoursesId: courseId }
+//                         });
+
+//                         return res.status(201).json({
+//                                     success: true,
+//                                     message: "Successfully enrolled in course",
+//                                     data: enrollment
+//                         });
+
+//             } catch (error) {
+//                         next(error);
+//             }
+// };
+
+
+
+//VIDEO LESSONS
+// GET /api/student/courses/:courseId/lessons
+
+
+
 export const enrollCourse = async (req, res, next) => {
             try {
-                        const { courseId } = req.body;
+                        // 1. Accept reference from the request body
+                        const { courseId, paymentRef } = req.body;
 
                         // check if course exists and is published
                         const course = await Course.findById(courseId);
@@ -244,11 +320,30 @@ export const enrollCourse = async (req, res, next) => {
                                                 message: "Course is not available yet"
                                     });
                         }
+
+                        // 2. MODIFIED: Allow paid courses IF a valid payment reference exists
                         if (course.price > 0) {
-                                    return res.status(400).json({
-                                                success: false,
-                                                message: "This course requires payment. Please proceed to checkout."
+                                    if (!reference) {
+                                                return res.status(400).json({
+                                                            success: false,
+                                                            message: "This course requires payment. Please proceed to checkout."
+                                                });
+                                    }
+
+                                    // Check your Payment database/collection to see if this reference is valid & successful
+                                    // Note: Replace 'Payment' with your actual Mongoose Payment model name
+                                    const paymentVerified = await Payment.findOne({
+                                                reference: paymentRef,
+                                                studentId: req.user.id, // Good security practice to match user
+                                                status: "success" // Or whatever string your system uses for success
                                     });
+
+                                    if (!paymentVerified) {
+                                                return res.status(400).json({
+                                                            success: false,
+                                                            message: "Invalid or unverified payment reference."
+                                                });
+                                    }
                         }
 
                         // check if student is already enrolled
@@ -293,8 +388,7 @@ export const enrollCourse = async (req, res, next) => {
             }
 };
 
-//VIDEO LESSONS
-// GET /api/student/courses/:courseId/lessons
+
 export const getCourseLessons = async (req, res, next) => {
             try {
                         const { courseId } = req.params;
