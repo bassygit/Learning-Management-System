@@ -9,6 +9,9 @@ import sendEmail from '../utils/sendEmail.js';
 import { otpEmailTemplate, verifyEmailOtpTemplate } from '../utils/emailTemplates.js';
 import jwt from 'jsonwebtoken';
 import BlacklistedToken from '../models/blacklistedTokenModel.js';
+import cloudinary from '../config/cloudinary.js';
+import {deleteFromCloudinary, getPublicIdFromUrl} from '../utils/cloudinaryHelper.js'
+
 
 
 const MAX_VERIFY_ATTEMPTS = 5;
@@ -421,6 +424,7 @@ export const updateProfile = async (req, res, next) => {
                         next(error);
             }
 };
+
 
 
 //CHANGE PASSWORD
