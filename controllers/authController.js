@@ -400,10 +400,11 @@ export const updateProfile = async (req, res, next) => {
                                     updateData.avatar = req.file.path; // new cloudinary URL
                         }
 
+                        // FIXED: Replaced { new: true } with { returnDocument: 'after' }
                         const updatedUser = await User.findByIdAndUpdate(
                                     req.user.id,
                                     updateData,
-                                    { new: true, runValidators: true }
+                                    { returnDocument: 'after', runValidators: true }
                         ).select('-password');
 
                         if (!updatedUser) {
@@ -420,6 +421,7 @@ export const updateProfile = async (req, res, next) => {
                         next(error);
             }
 };
+
 
 //CHANGE PASSWORD
 // PATCH /api/auth/change-password
