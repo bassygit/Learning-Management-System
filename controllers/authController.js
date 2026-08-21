@@ -405,7 +405,7 @@ export const updateProfile = async (req, res, next) => {
         // FIXED: Replaced { new: true } with { returnDocument: 'after' }
         const updatedUser = await User.findByIdAndUpdate(
             req.user.id,
-            updateData.avatar,
+            updateData,
             { returnDocument: 'after', runValidators: true }
         ).select('-password');
 
