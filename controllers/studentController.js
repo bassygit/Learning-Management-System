@@ -323,7 +323,7 @@ export const enrollCourse = async (req, res, next) => {
 
                         // 2. MODIFIED: Allow paid courses IF a valid payment reference exists
                         if (course.price > 0) {
-                                    if (!reference) {
+                                    if (!paymentRef) {
                                                 return res.status(400).json({
                                                             success: false,
                                                             message: "This course requires payment. Please proceed to checkout."
@@ -333,9 +333,9 @@ export const enrollCourse = async (req, res, next) => {
                                     // Check your Payment database/collection to see if this reference is valid & successful
                                     // Note: Replace 'Payment' with your actual Mongoose Payment model name
                                     const paymentVerified = await Payment.findOne({
-                                                reference: paymentRef,
+                                                paymentRef: paymentRef,
                                                 studentId: req.user.id, // Good security practice to match user
-                                                status: "success" // Or whatever string your system uses for success
+                                                status: "successful" // Or whatever string your system uses for success
                                     });
 
                                     if (!paymentVerified) {
